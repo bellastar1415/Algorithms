@@ -180,7 +180,7 @@ vending.addInv(plush)
 oreos = myItem(5, "oreos", 11, 3.50)
 vending.addInv(oreos)
 """
-vendingMoney = Money(20, 30, 20, 20, 40)
+vendingMoney = Money(19, 30, 21, 20, 40)
 theInput = [50]
 
 #Welcome message
