@@ -1,4 +1,10 @@
+import tkinter as tk
+from tkinter import Frame, ttk
+from PIL import Image, ImageTk
 from colorama import  Fore, Back, Style
+from colorama import  Fore, Back, Style
+
+global guiInput
 
 class Money:
     def __init__(self, dollars, quarters, dimes, nickels, pennies):
@@ -98,7 +104,7 @@ def calcPrice(price, twoWords):
         calcChange(change)
         return change
 
-def addItemFunc():
+def addItemFunc(userInput):
 #for i in range(0,len(myInventory)):
     if userInput[2].isdigit() or len(userInput) > 9:
         return -1
@@ -107,21 +113,21 @@ def addItemFunc():
         price = findItem[0]
         arrayValue = findItem[1]
         if price != 0:
-            print(Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL)
+           label.config(text = Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL, font= ('Helvetica 13')) 
         else:
             newItem = myItem(vending.num_items + 1, userInput[2], int(userInput[3]), float(priceInput[1]))
             vending.addInv(newItem)
-            print(Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL)
+            label.config(text = Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL, font =('Helvetica 13'))
     else: 
         findItem = vending.find(userInput[2]+' '+userInput[3], 0, -1) #inputs a price of $0 and array value of -1
         price = findItem[0]
         arrayValue = findItem[1]
         if price != 0:
-            print(Fore.BLUE + "\nItem already exists. Please add something different" + Style.RESET_ALL)
+            label.config(text = Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL, font= ('Helvetica 13')) 
         else:
             newItem = myItem(vending.num_items + 1, userInput[2]+' '+userInput[3], int(userInput[4]), float(priceInput[1]))
             vending.addInv(newItem)
-            print(Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL)
+            label.config(text = Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL, font =('Helvetica 13'))
     return 0
 
 def buyItemFunc():
@@ -188,15 +194,11 @@ print(Fore.BLACK + Style.DIM + "\n======================================\n++++++
 print(Fore.BLUE + Style.BRIGHT + "WELCOME TO THE ULTIMATE VENDING MACHINE"+ Style.RESET_ALL, end="")
 print(Fore.BLACK + Style.DIM + "\n======================================\n++++++++++++++++++++++++++++++++++++++\n======================================\n"+ Style.RESET_ALL)
 
-def newFunction():
-    randomVar = theInput.get()
 
-#start the input validation and output
-while True:
-    #get user input
-    theInput = input(Fore.WHITE + Style.BRIGHT + "What would you like to do? " + Style.RESET_ALL)
+def handle_click():
+    theInput = entry.get()
     if len(theInput) > 40:
-        print(Fore.RED + "\nPlease follow the guidelines in *help* when making your request\n" + Style.RESET_ALL)
+        label.config(text = Fore.RED + "\nPlease follow the guidelines in *help* when making your request\n" + Style.RESET_ALL, font= ('Helvetica 13'))
     else:
         userInput = theInput.split()
         history.append(theInput)
@@ -206,13 +208,13 @@ while True:
         if userInput[0] == 'add' and len(userInput) > 1:
             if userInput[1] == 'item':
                 if len(priceInput) > 1:
-                    inputCheck = addItemFunc()
+                    inputCheck = addItemFunc(userInput)
                     if inputCheck == -1:
-                        print(Fore.RED + "\nImproper Input Format\n" + Style.RESET_ALL)
+                        label.config(text = Fore.RED + "\nImproper Input Format\n" + Style.RESET_ALL, font= ('Helvetica 13'))
                 else:
-                    print(Fore.RED + "\nImproper Input Format\n" + Style.RESET_ALL)
+                    label.config(text = Fore.RED + "\nImproper Input Format\n" + Style.RESET_ALL, font= ('Helvetica 13'))
             else:
-                print(Fore.RED + "\nError. Request not recognized\n" + Style.RESET_ALL)
+               label.config(text = Fore.RED + "\Error. REquest not Recognized\n" + Style.RESET_ALL, font= ('Helvetica 13'))
         elif userInput[0] == 'buy' and len(userInput) > 1:
             if userInput[1] == 'item':
                 inputCheck = buyItemFunc()
@@ -244,7 +246,7 @@ while True:
             print(Fore.BLACK + Style.DIM + "\n=====================================================================\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n=====================================================================" + Style.RESET_ALL)
             print(Fore.BLUE + Style.BRIGHT + "THANK YOU FOR VISITING THE ULTIMATE VENDING MACHINE. HAVE A GOOD DAY"+ Style.RESET_ALL, end="")
             print(Fore.BLACK + Style.DIM + "\n=====================================================================\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n====================================================================="+ Style.RESET_ALL)
-            break
+            
         else:
             print(Fore.RED + "\nError. Request not recognized\n" + Style.RESET_ALL)
         properChange.dollars = 0
@@ -254,3 +256,66 @@ while True:
         properChange.pennies = 0
         inputCheck = 0
         twoWords = -1
+
+print("Hello")
+window = tk.Tk()
+##size of main window
+window.geometry("700x600")
+frame = Frame(window, width=800, height=800)
+frame.place(anchor='center',relx=0.5, rely=0.5)
+
+img = Image.open("vendingnew.png")
+##size of particular image
+resize_image = img.resize((500, 700))
+newImg = ImageTk.PhotoImage(resize_image)
+ 
+# create label and add resize image
+
+#window.attributes('-alpha',0.5)
+
+label = tk.Label(frame, 
+                 text="Hello, Tkinter", 
+                 #background="#34A2FE",
+                 ##size of our working canvas
+                 width = 1000,
+                 height = 800,
+                 image = newImg)
+##adds the greeting to our window
+
+'''
+entryLabel = tk.Label(text = "Please input your request here")
+entry = tk.Entry(fg="black", bg="yellow", width=50)
+
+entryLabel.pack()
+entry.pack()
+input = entry.get()
+print(input)
+'''
+
+
+def get_data():
+   label.config(text= entry.get(), font= ('Helvetica 13'))
+
+#Create an Entry Widget
+entry = tk.Entry(window, width= 42)
+entry.place(relx= .5, rely= .5, anchor= "center")
+
+#Inititalize a Label widget
+label2= tk.Label(window, text="", font=('Helvetica 13'))
+frame.pack()
+label.pack()
+label2.pack()
+
+#Create a Button to get the input data
+#button = tk.Button(window, text= "Click to Show", command= get_data).place(relx= .7, rely= .5, anchor= "center")
+button = tk.Button(
+    text="Click me!",
+    width=25,
+    height=5,
+    bg="blue",
+    fg="yellow",
+)
+button.bind("<Button-1>", handle_click)
+
+##runs out previous window applications
+window.mainloop()
