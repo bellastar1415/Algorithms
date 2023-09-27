@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Frame, ttk
+from tkinter import Frame, ttk, Label
 from PIL import Image, ImageTk
 from colorama import  Fore, Back, Style
 from colorama import  Fore, Back, Style
@@ -30,8 +30,11 @@ class myInventory:
         return self.current_inv[i].ID, self.current_inv[i].name, self.current_inv[i].quantity, self.current_inv[i].price
     def printInv(self):
         print(Fore.BLUE + Style.BRIGHT + "\nThe vending machine consists of the following options:\nID  Item  Quantity  Price" + Style.RESET_ALL + Fore.BLUE)
+        label = Label(window, text = "\nThe vending machine consists of the following options:\nID  Item  Quantity  Price")
         for i in range(0, self.num_items):
-           print(self.get_info(i))
+            print(self.get_info(i))
+            Label(window, text = self.get_info(i))
+            label.place(x=40+(i+5),y=90)
         print(Style.RESET_ALL)
     def find(self, compare, price, iteration):
         for i in range(0, self.num_items):
@@ -79,7 +82,7 @@ def calcChange(change):
         change -= .01
     return change
         
-def calcPrice(price, twoWords):
+def calcPrice(price, twoWords, userInput):
 
     if twoWords == 0:
         myMoney = Money(int(userInput[3]), int(userInput[4]), int(userInput[5]), int(userInput[6]), int(userInput[7]))
@@ -104,7 +107,22 @@ def calcPrice(price, twoWords):
         calcChange(change)
         return change
 
-def addItemFunc(userInput):
+def printSomething(var):
+    if var == 0:
+        label = Label(window, text = "Item already exists. Please input something differerent", font =('Helvetica 13'))
+        label.place(x=40,y=90)
+        print(Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL)
+    elif var == 1:
+        label = Label(window, text = "\nItem already exists. Please add something different\n", font =('Helvetica 13'))
+        label.pack()
+    elif var == 2:
+        label = Label(window, text = "Item successfully added.", font =('Helvetica 13'))
+        label.pack()
+    else:
+        return;
+
+
+def addItemFunc(userInput, priceInput):
 #for i in range(0,len(myInventory)):
     if userInput[2].isdigit() or len(userInput) > 9:
         return -1
@@ -113,24 +131,24 @@ def addItemFunc(userInput):
         price = findItem[0]
         arrayValue = findItem[1]
         if price != 0:
-           label.config(text = Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL, font= ('Helvetica 13')) 
+           printSomething(0)
         else:
             newItem = myItem(vending.num_items + 1, userInput[2], int(userInput[3]), float(priceInput[1]))
             vending.addInv(newItem)
-            label.config(text = Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL, font =('Helvetica 13'))
+            printSomething(2)
     else: 
         findItem = vending.find(userInput[2]+' '+userInput[3], 0, -1) #inputs a price of $0 and array value of -1
         price = findItem[0]
         arrayValue = findItem[1]
         if price != 0:
-            label.config(text = Fore.BLUE + "\nItem already exists. Please add something different\n" + Style.RESET_ALL, font= ('Helvetica 13')) 
+            printSomething(1)
         else:
             newItem = myItem(vending.num_items + 1, userInput[2]+' '+userInput[3], int(userInput[4]), float(priceInput[1]))
             vending.addInv(newItem)
-            label.config(text = Fore.BLUE + "\nItem successfully added\n" + Style.RESET_ALL, font =('Helvetica 13'))
+            printSomething(2)
     return 0
 
-def buyItemFunc():
+def buyItemFunc(userInput, priceInput):
     if userInput[2].isdigit() or len(userInput) > 9:
         return -1
     elif userInput[3].isdigit():
@@ -139,7 +157,7 @@ def buyItemFunc():
         price = findItem[0]
         arrayValue = findItem[1]
         if price!= 0:  #theoretically if the price != $0 then the item was found and the array value is returned
-            checkFunds = calcPrice(price, twoWords)
+            checkFunds = calcPrice(price, twoWords, userInput)
             if checkFunds == -1:
                 print(Fore.RED + "\nYou do not have the appropriate funds to purchase this item\n" + Style.RESET_ALL)
             elif checkFunds == -2:
@@ -155,7 +173,7 @@ def buyItemFunc():
         price = findItem[0]
         arrayValue = findItem[1]
         if price!= 0:  #theoretically if the price != $0 then the item was found and the array value is returned
-            checkFunds = calcPrice(price, twoWords)
+            checkFunds = calcPrice(price, twoWords, userInput)
             if checkFunds == -1:
                 print(Fore.RED + "\nYou do not have the appropriate funds to purchase this item\n" + Style.RESET_ALL)
             elif checkFunds == -2:
@@ -208,7 +226,7 @@ def handle_click():
         if userInput[0] == 'add' and len(userInput) > 1:
             if userInput[1] == 'item':
                 if len(priceInput) > 1:
-                    inputCheck = addItemFunc(userInput)
+                    inputCheck = addItemFunc(userInput, priceInput)
                     if inputCheck == -1:
                         label.config(text = Fore.RED + "\nImproper Input Format\n" + Style.RESET_ALL, font= ('Helvetica 13'))
                 else:
@@ -217,7 +235,7 @@ def handle_click():
                label.config(text = Fore.RED + "\Error. REquest not Recognized\n" + Style.RESET_ALL, font= ('Helvetica 13'))
         elif userInput[0] == 'buy' and len(userInput) > 1:
             if userInput[1] == 'item':
-                inputCheck = buyItemFunc()
+                inputCheck = buyItemFunc(userInput, priceInput)
             else: 
                 print(Fore.RED + "\nError. Request not recognized\n" + Style.RESET_ALL)
             if inputCheck == -1:
@@ -243,6 +261,7 @@ def handle_click():
             print(Fore.RED + "[history]\t\t\t\t", Fore.LIGHTRED_EX + "Shows the previous requested transactions" + Style.RESET_ALL)
             print(Fore.RED + "[inventory]\t\t\t\t", Fore.LIGHTRED_EX + "Shows the current inventory of the vending machine\n" + Style.RESET_ALL)
         elif userInput[0] == 'exit':
+            window.destroy()
             print(Fore.BLACK + Style.DIM + "\n=====================================================================\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n=====================================================================" + Style.RESET_ALL)
             print(Fore.BLUE + Style.BRIGHT + "THANK YOU FOR VISITING THE ULTIMATE VENDING MACHINE. HAVE A GOOD DAY"+ Style.RESET_ALL, end="")
             print(Fore.BLACK + Style.DIM + "\n=====================================================================\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n====================================================================="+ Style.RESET_ALL)
@@ -298,7 +317,7 @@ def get_data():
 
 #Create an Entry Widget
 entry = tk.Entry(window, width= 42)
-entry.place(relx= .5, rely= .5, anchor= "center")
+entry.place(relx= .47, rely= .87, anchor= "center")
 
 #Inititalize a Label widget
 label2= tk.Label(window, text="", font=('Helvetica 13'))
@@ -307,15 +326,15 @@ label.pack()
 label2.pack()
 
 #Create a Button to get the input data
-#button = tk.Button(window, text= "Click to Show", command= get_data).place(relx= .7, rely= .5, anchor= "center")
-button = tk.Button(
+button = tk.Button(window, text= "Push", command= handle_click).place(relx= .4, rely= .8, anchor= "center")
+'''button = tk.Button(
     text="Click me!",
     width=25,
     height=5,
     bg="blue",
     fg="yellow",
-)
-button.bind("<Button-1>", handle_click)
+)'''
+#button.bind("<Button-1>", handle_click)
 
 ##runs out previous window applications
 window.mainloop()
