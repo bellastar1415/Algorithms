@@ -1,13 +1,15 @@
 import tkinter as tk
-from tkinter import Frame, Label
+from tkinter import Frame, Label, Toplevel, Entry, Button, messagebox
 from PIL import Image, ImageTk
 from colorama import  Fore, Back, Style
 from colorama import  Fore, Back, Style
 from playsound import playsound
+from tkinter.ttk import Button
  
 
 global guiInput
 labellist = []
+newlist = []
 
 class Money:
     def __init__(self, dollars, quarters, dimes, nickels, pennies):
@@ -144,6 +146,7 @@ def printSomething(var):
         label = Label(window, text = "\nTo navigate the vending machine, please use one of the following commands:\n\n[add item name quantity $price]\t Adds an item to the vending machine if it does not already exist. Must use '$'\n[balance]\t\t\t\t Shows the current balance of the vending machine\n[buy item name #dollars #quarters #dimes #nickels #pennies] Buys an item from the vending machine. NOTE: Zeros must be inputted for any currency not used\n[exit]\t\t\t\t Exits the vending machine\n[help]\t\t\t\t Displays the help table\n[history]\t\t\t\t Shows the previous requested transactions\n[inventory]\t\t\t Shows the current inventory of the vending machine\n", font =('Helvetica 10'), justify='left', wraplength=600, bg='lightgrey', fg='red')
         label.place(x = 50, y = 155)
         label.after(5000, lambda:label.config(text=""))
+        history.append(newlist)
     elif var == 6:
         print(Fore.RED + "\nYou do not have the appropriate funds to purchase this item\n" + Style.RESET_ALL)
         label = Label(window, text = "You do not have the appropriate funds to purchase this item", fg= 'red', font =('Helvetica 13'))
@@ -183,7 +186,7 @@ def addItemFunc(userInput, priceInput):
             printSomething(1)
     return 0
 
-def buyItemFunc(userInput, priceInput):
+def buyItemFunc(userInput):
     if userInput[2].isdigit() or len(userInput) > 9:
         return -1
     elif userInput[3].isdigit():
@@ -247,8 +250,10 @@ airpods = myItem(3, "airpods", 3, 60.00)
 vending.addInv(airpods)
 plush = myItem(4, "plushie", 14, 15.25)
 vending.addInv(plush)
-oreos = myItem(5, "oreos", 11, 3.50)
-vending.addInv(oreos)
+kitkat = myItem(5, "kitkat", 11, 3.50)
+vending.addInv(kitkat)
+gum = myItem(6, "gum", 15, 4)
+vending.addInv(gum)
 
 vendingMoney = Money(19, 30, 21, 20, 40)
 theInput = [50]
@@ -280,7 +285,7 @@ def handle_click():
                 printSomething(4)
         elif userInput[0] == 'buy' and len(userInput) > 1:
             if userInput[1] == 'item':
-                inputCheck = buyItemFunc(userInput, priceInput)
+                inputCheck = buyItemFunc(userInput)
             else: 
                 printSomething(4)
             if inputCheck == -1:
@@ -303,10 +308,10 @@ def handle_click():
                 print(i+1, history[i])
                 #variable = tk.StringVar(history[i])
                 label = Label(window, text = "%s:" % (i+1))
-                label.place(x=55,y=70+(i*20))
+                label.place(x=20,y=70+(i*20))
                 labellist.append(label)
                 label = Label(window, text = "%s" % history[i])
-                label.place(x=65,y=70+(i*20))
+                label.place(x=35,y=70+(i*20))
                 labellist.append(label)
             print(Style.RESET_ALL)
         elif userInput[0] == 'help':
@@ -335,6 +340,72 @@ def handle_click():
         inputCheck = 0
         twoWords = -1
 
+def item_button_click(item):
+    newlist.append("buy")
+    newlist.append("item")
+    newlist.append(item)
+    def calculate_total():
+        try:
+            dollars = int(dollar_entry.get())
+            newlist.append(str(dollars))
+            quarters = int(quarter_entry.get())
+            newlist.append(str(quarters))
+            dimes = int(dime_entry.get())
+            newlist.append(str(dimes))
+            nickels = int(nickel_entry.get())
+            newlist.append(str(nickels))
+            pennies = int(penny_entry.get())
+            newlist.append(str(pennies))
+
+            total = dollars + (quarters*0.25) + (dimes*0.10) + (nickels*0.05) + (pennies*0.01)
+            inputCheck = buyItemFunc(newlist)
+            if inputCheck == -1:
+                printSomething(3)
+            properChange.dollars = 0
+            properChange.quarters = 0
+            properChange.dimes = 0
+            properChange.nickels = 0
+            properChange.pennies = 0
+            inputCheck = 0
+            twoWords = -1
+            history.append(newlist)
+
+            ''' if total >= 2.50:  # Set this to the cost of a coke
+                messagebox.showinfo("Success", "Enjoy your coke!")
+                top.destroy()
+            else:
+                messagebox.showwarning("Insufficient Funds", "You don't have enough money.")'''
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter valid coin counts.")
+        finally:
+            top.destroy()
+    
+    top = Toplevel(window)
+    top.title("Payment")
+
+    Label(top, text="Enter your coins:").pack(pady=10)
+
+    dollar_entry = Entry(top, width=10)
+    dollar_entry.pack(pady=5)
+    Label(top, text="Dollars").pack()
+
+    quarter_entry = Entry(top, width=10)
+    quarter_entry.pack(pady=5)
+    Label(top, text="Quarters").pack()
+
+    dime_entry = Entry(top, width=10)
+    dime_entry.pack(pady=5)
+    Label(top, text="Dimes").pack()
+
+    nickel_entry = Entry(top, width=10)
+    nickel_entry.pack(pady=5)
+    Label(top, text="Nickels").pack()
+
+    penny_entry = Entry(top, width=10)
+    penny_entry.pack(pady=5)
+    Label(top, text="Pennies").pack()
+
+    Button(top, text="Submit", command=calculate_total).pack(pady=20)
 
 window = tk.Tk()
 ##size of main window
@@ -353,26 +424,21 @@ newImg = ImageTk.PhotoImage(resize_image)
 
 label = tk.Label(frame, 
                  text="Hello, Tkinter", 
-                 #background="#34A2FE",
+                 #background="white",
                  ##size of our working canvas
                  width = 1000,
                  height = 800,
                  image = newImg)
 ##adds the greeting to our window
 
-'''
-entryLabel = tk.Label(text = "Please input your request here")
-entry = tk.Entry(fg="black", bg="yellow", width=50)
-
-entryLabel.pack()
-entry.pack()
-input = entry.get()
-print(input)
-'''
-
 def remove_data():
     for label in labellist:
         label["text"] = ""
+    newlist.clear()
+
+def addInvProperly():
+    history.append("inventory")
+    vending.printInv()
         
 def get_data():
    label.config(text= entry.get(), font= ('Helvetica 13'))
@@ -390,15 +456,44 @@ label2.pack()
 
 #Create a Button to get the input data
 button = tk.Button(window, text= "Enter Request", width = 20, height = 3, bg='grey', command=handle_click).place(relx= .45, rely= .79, anchor= "center")
-'''button = tk.Button(
-    text="Click me!",
-    width=25,
-    height=5,
-    bg="blue",
-    fg="yellow",
-)'''
 
-button = tk.Button(window, text= "Inventory", command= vending.printInv, bg ='grey', highlightthickness=0).place(relx= .45, rely= .67, anchor= "center")
+itemImg = Image.open("Finished\coca-cola-591ml-04904403.png")
+resize_image = itemImg.resize((50, 40))
+cokeImg = ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=cokeImg, width=40, height=45, borderwidth=0, command=lambda:item_button_click("coke"), bg='black', activebackground='white', highlightthickness=0).place(relx= .35, rely= .12, anchor= "center")
+
+chipImg = Image.open("bagochips1.png")
+resize_image = chipImg.resize((50, 40))
+chipImg = ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=chipImg, width=40, height=45, borderwidth=0, command=lambda:item_button_click("chips"), bg='black', activebackground='white', highlightthickness=0).place(relx= .45, rely= .12, anchor= "center")
+
+cocoaImg = Image.open("Finished/chocolate1.png")
+resize_image = cocoaImg.resize((50, 60))
+cocoaImg= ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=cocoaImg, width=40, height=30, borderwidth=0, command=lambda:item_button_click("kitkat"), bg='black', activebackground='white', highlightthickness=0).place(relx= .485, rely= .37, anchor= "center")
+
+gumImg = Image.open("Finished/gum2.png")
+resize_image = gumImg.resize((50, 40))
+gumImg= ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=gumImg, width=35, height=25, borderwidth=0, command=lambda:item_button_click("gum"), bg='black', activebackground='white', highlightthickness=0).place(relx= .41, rely= .49, anchor= "center")
+
+kirbyImg = Image.open("Finished/kribydone.png")
+resize_image = kirbyImg.resize((55, 55))
+kirbyImg= ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=kirbyImg, width=50, height=48, borderwidth=0, command=lambda:item_button_click("plushie"), bg='black', activebackground='white', highlightthickness=0).place(relx= .45, rely= .59, anchor= "center")
+
+aImg = Image.open("Finished/airpodsdoneoutofframe.png")
+resize_image = aImg.resize((30, 30))
+aImg= ImageTk.PhotoImage(resize_image)
+
+button = tk.Button(window, image=aImg, width=26, height=30, borderwidth=0, command=lambda:item_button_click("airpods"), bg='black', activebackground='black', highlightthickness=0).place(relx= .59, rely= .25, anchor= "center")
+
+button = tk.Button(window, text= "Inventory", command= lambda:addInvProperly(), bg ='grey', highlightthickness=0).place(relx= .45, rely= .67, anchor= "center")
 
 myImg = Image.open("question.png")
 resize_image = myImg.resize((30, 30))
@@ -406,6 +501,7 @@ click_btn = ImageTk.PhotoImage(resize_image)
 
 button = tk.Button(window, image=click_btn, command= lambda:printSomething(5), width=30, height=30, borderwidth=0).place(relx= .95, rely= .05, anchor= "center")
 #button.bind("<Button-1>", handle_click)
+
 button = tk.Button(window, text= "Clear", command= remove_data, bg ='grey', height = 1).place(relx= .69, rely= .87, anchor= "center")
 ##runs out previous window applications
 window.mainloop()
